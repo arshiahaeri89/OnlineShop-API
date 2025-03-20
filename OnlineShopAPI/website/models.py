@@ -1,6 +1,32 @@
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.text import slugify
-from .utils import upload_to
+from .utils import upload_to, generate_random_username
+
+
+class ShopUser(AbstractUser):
+    phone_number = models.CharField(max_length=13, verbose_name='Phone Number')
+    address = models.TextField(verbose_name='Address', null=True, blank=True)
+    postal_code = models.CharField(max_length=10, verbose_name='Postal Code',
+                                   null=True, blank=True)
+
+    def __str__(self):
+        return f's{self.username} - {self.phone_number}'
+
+    def save(self, *args, **kwargs):
+        if not self.username:
+            while True:
+                random_username = generate_random_username()
+
+                if not ShopUser.objects.filter(username=random_username).exists():
+                    self.username = slugify(random_username)
+                    break
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Shop User'
+        verbose_name_plural = 'Shop Users'
 
 
 class Category(models.Model):
@@ -30,12 +56,10 @@ class Product(models.Model):
     price = models.IntegerField(verbose_name='Price')
     has_off = models.BooleanField(verbose_name='Has Off')
     price_after_off = models.IntegerField(verbose_name='Price After Off',
-                                          null=True)
+                                          null=True, blank=True)
     stock = models.IntegerField(verbose_name='Stock Count')
     product_code = models.CharField(max_length=10, unique=True,
                                     verbose_name='Product Code')
-
-    # TODO: Add Comments
 
     def __str__(self):
         return f'{self.product_code} - {self.title} - {self.category}'
@@ -56,3 +80,21 @@ class ProductImage(models.Model):
     class Meta:
         verbose_name = 'Product Image'
         verbose_name_plural = 'Product Images'
+
+
+class Comment(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                related_name='comments')
+    user = models.ForeignKey(ShopUser, on_delete=models.CASCADE,
+                             related_name='comments')
+    title = models.CharField(max_length=50, verbose_name='Title')
+    text = models.TextField(verbose_name='Text')
+    rate = models.IntegerField(verbose_name='Rate',
+                               validators=[MinValueValidator(1), MaxValueValidator(5)])
+
+    def __str__(self):
+        return f'{self.user.username} - {self.product}'
+
+    class Meta:
+        verbose_name = 'Comment'
+        verbose_name_plural = 'Comments'
