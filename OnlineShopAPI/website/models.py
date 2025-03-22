@@ -12,7 +12,7 @@ class ShopUser(AbstractUser):
                                    null=True, blank=True)
 
     def __str__(self):
-        return f's{self.username} - {self.phone_number}'
+        return f'{self.username} - {self.phone_number}'
 
     def save(self, *args, **kwargs):
         if not self.username:
