@@ -6,21 +6,22 @@ from .models import *
 class ShopUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShopUser
-        fields = '__all__'
+        fields = ['username', 'first_name', 'last_name',
+                  'phone_number', 'address', 'postal_code']
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    user = ShopUserSerializer(read_only=True, many=True)
+    user = serializers.PrimaryKeyRelatedField(queryset=ShopUser.objects.all())
 
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ['product', 'user', 'title', 'text', 'rate']
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
-        fields = '__all__'
+        fields = ['image', 'image_number', 'product']
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -32,7 +33,11 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(read_only=True, many=True)
     images = ProductImageSerializer(read_only=True, many=True)
-    category = CategorySerializer(read_only=True, many=True)
+    category_name = serializers.SerializerMethodField()
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+
+    def get_category_name(self, obj):
+        return obj.category.name
 
     class Meta:
         model = Product

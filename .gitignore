@@ -85,3 +85,7 @@ db.sqlite3
 # Pycharm
 .idea/
 OnlineShopAPI/.idea
+
+# Media and Logs
+media/
+log/

@@ -6,10 +6,13 @@ from .utils import upload_to, generate_random_username
 
 
 class ShopUser(AbstractUser):
-    phone_number = models.CharField(max_length=13, verbose_name='Phone Number')
+    username = models.CharField(max_length=150, blank=True, null=True)
+    phone_number = models.CharField(max_length=13, unique=True, verbose_name='Phone Number')
     address = models.TextField(verbose_name='Address', null=True, blank=True)
     postal_code = models.CharField(max_length=10, verbose_name='Postal Code',
                                    null=True, blank=True)
+
+    USERNAME_FIELD = 'phone_number'
 
     def __str__(self):
         return f'{self.username} - {self.phone_number}'
@@ -89,7 +92,7 @@ class Comment(models.Model):
                              related_name='comments')
     title = models.CharField(max_length=50, verbose_name='Title')
     text = models.TextField(verbose_name='Text')
-    rate = models.IntegerField(verbose_name='Rate',
+    rate = models.FloatField(verbose_name='Rate',
                                validators=[MinValueValidator(1), MaxValueValidator(5)])
 
     def __str__(self):
