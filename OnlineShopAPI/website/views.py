@@ -1,4 +1,5 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.pagination import PageNumberPagination
 
 from .serializers import *
 from .models import *
@@ -14,9 +15,14 @@ class CategoryApiView(ModelViewSet):
     serializer_class = CategorySerializer
 
 
+class ProductApiViewPagination(PageNumberPagination):
+    page_size = 2  # TODO: Find a Good Page Size
+
+
 class ProductApiView(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    pagination_class = ProductApiViewPagination
 
 
 class ProductImageApiView(ModelViewSet):
@@ -24,6 +30,11 @@ class ProductImageApiView(ModelViewSet):
     serializer_class = ProductImageSerializer
 
 
+class CommentApiViewPagination(PageNumberPagination):
+    page_size = 2  # TODO: Find a Good Page Size
+
+
 class CommentApiView(ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    pagination_class = CommentApiViewPagination
