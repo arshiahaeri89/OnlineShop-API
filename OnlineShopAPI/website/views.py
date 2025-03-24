@@ -20,13 +20,13 @@ class ProductApiViewPagination(PageNumberPagination):
 
 
 class ProductApiView(ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.order_by('-created_at').all()
     serializer_class = ProductSerializer
     pagination_class = ProductApiViewPagination
 
 
 class ProductImageApiView(ModelViewSet):
-    queryset = ProductImage.objects.all()
+    queryset = ProductImage.objects.order_by('image_number').all()
     serializer_class = ProductImageSerializer
 
 
@@ -35,6 +35,6 @@ class CommentApiViewPagination(PageNumberPagination):
 
 
 class CommentApiView(ModelViewSet):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.order_by('-created_at').all()
     serializer_class = CommentSerializer
     pagination_class = CommentApiViewPagination

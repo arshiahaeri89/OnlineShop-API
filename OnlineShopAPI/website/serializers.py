@@ -24,12 +24,6 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['image', 'image_number', 'product']
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = '__all__'
-
-
 class ProductSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(read_only=True, many=True)
     images = ProductImageSerializer(read_only=True, many=True)
@@ -41,4 +35,12 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
+        fields = '__all__'
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    products = ProductSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Category
         fields = '__all__'

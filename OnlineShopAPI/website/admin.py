@@ -16,8 +16,9 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['product_code', 'title', 'brand', 'category', 'price', 'has_off', 'price_after_off']
+    list_display = ['product_code', 'title', 'brand', 'category', 'price', 'has_off', 'price_after_off', 'created_at']
     list_filter = ['brand', 'category', 'has_off']
+    readonly_fields = ['created_at']
 
 
 @admin.register(ProductImage)
@@ -28,5 +29,6 @@ class ProductImageAdmin(admin.ModelAdmin):
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ['product', 'user', 'title', 'rate']
+    list_display = ['product', 'user', 'title', 'rate', 'created_at']
     list_filter = ['product', 'user', 'rate']
+    readonly_fields = ['created_at']

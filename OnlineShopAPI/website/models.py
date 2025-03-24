@@ -55,7 +55,7 @@ class Product(models.Model):
     description = models.TextField(verbose_name='Description')
     brand = models.CharField(max_length=50, verbose_name='Brand')
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
-                                 verbose_name='Category')
+                                 verbose_name='Category', related_name='products')
     price = models.IntegerField(verbose_name='Price')
     has_off = models.BooleanField(verbose_name='Has Off')
     price_after_off = models.IntegerField(verbose_name='Price After Off',
@@ -63,6 +63,7 @@ class Product(models.Model):
     stock = models.IntegerField(verbose_name='Stock Count')
     product_code = models.CharField(max_length=10, unique=True,
                                     verbose_name='Product Code')
+    created_at = models.DateTimeField(verbose_name='Created Date', auto_now_add=True)
 
     def __str__(self):
         return f'{self.product_code} - {self.title} - {self.category}'
@@ -94,6 +95,7 @@ class Comment(models.Model):
     text = models.TextField(verbose_name='Text')
     rate = models.FloatField(verbose_name='Rate',
                                validators=[MinValueValidator(1), MaxValueValidator(5)])
+    created_at = models.DateTimeField(verbose_name='Created Date', auto_now_add=True)
 
     def __str__(self):
         return f'{self.user.username} - {self.product}'
