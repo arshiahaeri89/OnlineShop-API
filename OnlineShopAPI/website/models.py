@@ -6,11 +6,17 @@ from .utils import upload_to, generate_random_username
 
 
 class ShopUser(AbstractUser):
+    ROLE_CHOICES = [
+        ('admin', 'Admin'),
+        ('seller', 'Seller'),
+        ('buyer', 'Buyer'),
+    ]
     username = models.CharField(max_length=150, blank=True, null=True)
     phone_number = models.CharField(max_length=13, unique=True, verbose_name='Phone Number')
     address = models.TextField(verbose_name='Address', null=True, blank=True)
     postal_code = models.CharField(max_length=10, verbose_name='Postal Code',
                                    null=True, blank=True)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='buyer')
 
     USERNAME_FIELD = 'phone_number'
 
