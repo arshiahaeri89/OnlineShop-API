@@ -9,6 +9,7 @@ router.register('categories', CategoryApiView)
 router.register('products', ProductApiView)
 router.register('product_images', ProductImageApiView)
 router.register('product_comments', CommentApiView)
+router.register('orders', OrderApiView)
 
 app_name = 'website'
 urlpatterns = [

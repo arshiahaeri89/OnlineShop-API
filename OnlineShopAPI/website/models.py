@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.text import slugify
-from .utils import upload_to, generate_random_username
+from .utils import upload_to, generate_random_username, random_str
 
 
 class ShopUser(AbstractUser):
@@ -62,10 +62,10 @@ class Product(models.Model):
     brand = models.CharField(max_length=50, verbose_name='Brand')
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  verbose_name='Category', related_name='products')
-    price = models.IntegerField(verbose_name='Price')
+    price = models.PositiveIntegerField(verbose_name='Price')
     has_off = models.BooleanField(verbose_name='Has Off')
-    price_after_off = models.IntegerField(verbose_name='Price After Off',
-                                          null=True, blank=True)
+    price_after_off = models.PositiveIntegerField(verbose_name='Price After Off',
+                                                  null=True, blank=True)
     stock = models.IntegerField(verbose_name='Stock Count')
     product_code = models.CharField(max_length=10, unique=True,
                                     verbose_name='Product Code')
@@ -82,7 +82,7 @@ class Product(models.Model):
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to=upload_to)
-    image_number = models.IntegerField(verbose_name='Image Number')
+    image_number = models.PositiveIntegerField(verbose_name='Image Number')
 
     def __str__(self):
         return f'{self.product.product_code} - {self.image_number}'
@@ -99,7 +99,7 @@ class Comment(models.Model):
                              related_name='comments')
     title = models.CharField(max_length=50, verbose_name='Title')
     text = models.TextField(verbose_name='Text')
-    rate = models.FloatField(verbose_name='Rate',
+    rate = models.DecimalField(verbose_name='Rate', max_digits=2, decimal_places=1,
                                validators=[MinValueValidator(1), MaxValueValidator(5)])
     created_at = models.DateTimeField(verbose_name='Created Date', auto_now_add=True)
 
@@ -109,3 +109,51 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Comment'
         verbose_name_plural = 'Comments'
+
+
+class Order(models.Model):
+    user = models.ForeignKey(ShopUser, on_delete=models.CASCADE,
+                             related_name='orders')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,
+                                related_name='orders')
+    quantity = models.PositiveIntegerField(default=1,
+                                           validators=[MinValueValidator(1)],
+                                           verbose_name='Quantity')
+    total_price = models.PositiveIntegerField(verbose_name='Total Price', null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[
+        ('payed', 'پرداخت شده'),
+        ('processing', 'در حال پردازش'),
+        ('shipped', 'ارسال شده'),
+        ('delivered', 'موفق'),
+        ('canceled', 'لغو شده'),
+        ('returned', 'مرجوع شده'),
+        ('refunded', 'هزینه برگشت داده شده'),
+    ], default='payed')
+    track_code = models.CharField(max_length=10, unique=True,
+                                  editable=False, verbose_name='Track Code')
+
+    @staticmethod
+    def generate_random_track_code(length):
+        while True:
+            track_code = random_str(length)
+            if not Order.objects.filter(track_code=track_code).first():
+                break
+        return track_code
+
+    def save(self, *args, **kwargs):
+        # Calculating the price
+        product_price = self.product.price_after_off if self.product.has_off else self.product.price
+        self.total_price = self.quantity * product_price
+
+        # Generating the track_code
+        self.track_code = self.generate_random_track_code(10)
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.track_code} - {self.product.product_code} - {self.quantity} - {self.status}'
+
+    class Meta:
+        verbose_name = 'Order'
+        verbose_name_plural = 'Orders'
