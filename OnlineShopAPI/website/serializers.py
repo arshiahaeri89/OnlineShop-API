@@ -33,11 +33,18 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['image', 'image_number', 'product']
 
 
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = '__all__'  # ***
+
+
 class ProductSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(read_only=True, many=True)
     images = ProductImageSerializer(read_only=True, many=True)
     category_name = serializers.SerializerMethodField()
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    orders = OrderSerializer(read_only=True, many=True)
 
     def get_category_name(self, obj):
         return obj.category.name
